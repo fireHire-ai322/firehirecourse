@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FireHire – Ignition Program Application</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fire: #FF4D00;
+    --fire-light: #FF7A3D;
+    --ember: #FFB347;
+    --dark: #0A0A0F;
+    --dark2: #111118;
+    --dark3: #1A1A24;
+    --card: #16161F;
+    --border: rgba(255,77,0,0.18);
+    --text: #F0EDE8;
+    --muted: #7A7A8A;
+    --success: #00E5A0;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Blurred background logo */
+  .bg-logo {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(600px, 90vw);
+    height: min(600px, 90vw);
+    object-fit: contain;
+    opacity: 0.06;
+    filter: blur(18px) saturate(0.3);
+    pointer-events: none;
+    z-index: 0;
+    animation: pulse-bg 8s ease-in-out infinite;
+  }
+
+  @keyframes pulse-bg {
+    0%, 100% { opacity: 0.05; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.09; transform: translate(-50%, -50%) scale(1.04); }
+  }
+
+  /* Mesh gradient */
+  .mesh {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 40% at 15% 20%, rgba(255,77,0,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 85% 75%, rgba(255,115,61,0.08) 0%, transparent 55%),
+      radial-gradient(ellipse 80% 60% at 50% 110%, rgba(255,179,71,0.05) 0%, transparent 50%);
+  }
+
+  /* Page wrapper */
+  .page {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 16px 80px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .logo-img {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 14px rgba(255,77,0,0.5));
+  }
+
+  .brand-name {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 38px);
+    font-weight: 800;
+    background: linear-gradient(135deg, #FF4D00 0%, #FFB347 60%, #FF7A3D 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .course-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(255,77,0,0.15), rgba(255,179,71,0.1));
+    border: 1px solid rgba(255,77,0,0.35);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--ember);
+    margin-bottom: 16px;
+  }
+
+  .course-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--fire);
+    box-shadow: 0 0 8px var(--fire);
+    animation: blink 1.5s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .header-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.25;
+  }
+
+  .header-sub {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 440px;
+    line-height: 1.6;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: clamp(28px, 5vw, 48px);
+    width: 100%;
+    max-width: 560px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.03),
+      0 24px 80px rgba(0,0,0,0.5),
+      0 0 60px rgba(255,77,0,0.05);
+    animation: fadeUp 0.7s 0.15s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--fire), var(--ember), var(--fire), transparent);
+  }
+
+  /* Field groups */
+  .field-group {
+    margin-bottom: 22px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .field-group:nth-child(1) { animation-delay: 0.2s }
+  .field-group:nth-child(2) { animation-delay: 0.27s }
+  .field-group:nth-child(3) { animation-delay: 0.34s }
+  .field-group:nth-child(4) { animation-delay: 0.41s }
+  .field-group:nth-child(5) { animation-delay: 0.48s }
+  .field-group:nth-child(6) { animation-delay: 0.55s }
+
+  label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  label span.req { color: var(--fire); margin-left: 2px; }
+  label span.opt { color: var(--muted); font-size: 10px; font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: 4px; }
+
+  input, select {
+    width: 100%;
+    background: var(--dark3);
+    border: 1.5px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input::placeholder { color: rgba(255,255,255,0.2); }
+
+  input:focus, select:focus {
+    border-color: var(--fire);
+    box-shadow: 0 0 0 3px rgba(255,77,0,0.12), 0 0 20px rgba(255,77,0,0.06);
+    background: rgba(26,26,36,0.9);
+  }
+
+  input.error {
+    border-color: #FF4466;
+    box-shadow: 0 0 0 3px rgba(255,68,102,0.1);
+  }
+
+  input.valid {
+    border-color: var(--success);
+    box-shadow: 0 0 0 3px rgba(0,229,160,0.08);
+  }
+
+  .field-error {
+    font-size: 11.5px;
+    color: #FF6B80;
+    margin-top: 5px;
+    display: none;
+    padding-left: 2px;
+  }
+
+  .field-error.show { display: block; }
+
+  /* Select arrow */
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--muted);
+    pointer-events: none;
+    transition: border-top-color 0.2s;
+  }
+
+  .select-wrap:focus-within::after { border-top-color: var(--fire); }
+
+  select option { background: #1A1A24; color: var(--text); }
+
+  /* Recruiter field reveal */
+  .recruiter-field {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin-bottom 0.3s;
+    margin-bottom: 0;
+  }
+
+  .recruiter-field.visible {
+    max-height: 120px;
+    opacity: 1;
+    margin-bottom: 22px;
+  }
+
+  /* Submit */
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--fire) 0%, #FF6B2B 50%, var(--fire-light) 100%);
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    margin-top: 8px;
+    box-shadow: 0 8px 32px rgba(255,77,0,0.3);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .submit-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(255,77,0,0.45);
+  }
+
+  .submit-btn:not(:disabled):active {
+    transform: translateY(0);
+  }
+
+  .submit-btn .btn-shimmer {
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 2.5s infinite;
+  }
+
+  @keyframes shimmer { 0%{left:-100%} 100%{left:200%} }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0 24px;
+    color: rgba(255,255,255,0.1);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+  }
+
+  /* Steps counter */
+  .steps {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 32px;
+  }
+
+  .step-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    transition: all 0.3s;
+  }
+
+  .step-dot.active {
+    background: var(--fire);
+    box-shadow: 0 0 10px var(--fire);
+    width: 24px;
+    border-radius: 4px;
+  }
+
+  /* Success screen */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 20px 0;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .success-screen.show { display: block; }
+  .form-fields.hide { display: none; }
+
+  .success-icon {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, rgba(0,229,160,0.15), rgba(0,229,160,0.05));
+    border: 2px solid rgba(0,229,160,0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 32px;
+    box-shadow: 0 0 30px rgba(0,229,160,0.15);
+  }
+
+  .success-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--success);
+    margin-bottom: 14px;
+  }
+
+  .success-msg {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  .success-msg strong { color: var(--text); }
+
+  .whatsapp-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    background: rgba(37,211,102,0.1);
+    border: 1px solid rgba(37,211,102,0.25);
+    border-radius: 100px;
+    padding: 8px 18px;
+    font-size: 13px;
+    color: #25D366;
+    font-weight: 500;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 32px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.15);
+    text-align: center;
+    animation: fadeUp 0.7s 0.5s ease both;
+  }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    .page { padding: 32px 12px 60px; }
+    .card { padding: 24px 20px; border-radius: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<img src="https://i.ibb.co/DDmGhQpv/Gemini-Generated-Image-p2qqcyp2qqcyp2qq-removebg-preview.png" alt="" class="bg-logo" aria-hidden="true">
+<div class="mesh"></div>
+
+<div class="page">
+
+  <header class="header">
+    <div class="logo-wrap">
+      <img src="https://i.ibb.co/DDmGhQpv/Gemini-Generated-Image-p2qqcyp2qqcyp2qq-removebg-preview.png" alt="FireHire Logo" class="logo-img">
+      <span class="brand-name">FireHire</span>
+    </div>
+    <div class="course-badge">Now Enrolling</div>
+    <h1 class="header-title">Ignition Program</h1>
+    <p class="header-sub">Your fast track to a professional Call Center career in English. Complete the form and we'll reach out on WhatsApp.</p>
+  </header>
+
+  <div class="card">
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Application Submitted!</div>
+      <p class="success-msg">
+        Thank you for applying to the <strong>Ignition Program</strong>.<br><br>
+        Our team will follow up with you on <strong>WhatsApp</strong> to walk you through everything you need to know about the course.
+      </p>
+      <div class="whatsapp-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        We'll contact you on WhatsApp
+      </div>
+    </div>
+
+    <div class="form-fields" id="formFields">
+
+      <div class="field-group">
+        <label for="applicantName">Applicant Name <span class="req">*</span></label>
+        <input type="text" id="applicantName" placeholder="Your full name" autocomplete="name">
+        <div class="field-error" id="err-name">Please enter your full name.</div>
+      </div>
+
+      <div class="field-group">
+        <label for="whatsapp">WhatsApp Number <span class="req">*</span></label>
+        <input type="tel" id="whatsapp" placeholder="+20 1XX XXX XXXX" autocomplete="tel">
+        <div class="field-error" id="err-wa">Please enter a valid WhatsApp number.</div>
+      </div>
+
+      <div class="field-group">
+        <label for="email">Email Address <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="you@gmail.com" autocomplete="email">
+        <div class="field-error" id="err-email">Please enter a valid Gmail address (e.g. you@gmail.com).</div>
+      </div>
+
+      <div class="field-group">
+        <label for="englishLevel">English Level <span class="req">*</span></label>
+        <div class="select-wrap">
+          <select id="englishLevel">
+            <option value="" disabled selected>Select your level</option>
+            <option value="A1-A2">A1 – A2 &nbsp; (Beginner)</option>
+            <option value="A2+-B1+">A2+ – B1+ &nbsp; (Intermediate)</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-level">Please select your English level.</div>
+      </div>
+
+      <div class="field-group">
+        <label for="howReach">How did you reach us? <span class="req">*</span></label>
+        <div class="select-wrap">
+          <select id="howReach" onchange="handleSourceChange(this.value)">
+            <option value="" disabled selected>Select an option</option>
+            <option value="Via Social Media">Via Social Media</option>
+            <option value="Via Recruiter">Via Recruiter</option>
+            <option value="I Was Rejected With FireHire">I Was Rejected With FireHire</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-reach">Please select how you found us.</div>
+      </div>
+
+      <div class="recruiter-field" id="recruiterField">
+        <label for="recruiterName">Recruiter's Name <span class="opt">(optional)</span></label>
+        <input type="text" id="recruiterName" placeholder="Enter the recruiter's name">
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
+        <span class="btn-shimmer"></span>
+        <span id="btnText">Submit Application</span>
+      </button>
+
+    </div>
+  </div>
+
+  <div class="footer">© 2025 FireHire Academy · All rights reserved</div>
+
+</div>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────────────────────────────
+  // Replace this with your deployed Google Apps Script Web App URL
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzQTBAycEICgP-jLHAsEJC-DobubYrZ1pdPw9bbTmnUb5bD4feWhJsXq_gLpxOzuujG/exec';
+  // ────────────────────────────────────────────────────────────────────────
+
+  function handleSourceChange(val) {
+    const field = document.getElementById('recruiterField');
+    if (val === 'Via Recruiter') {
+      field.classList.add('visible');
+    } else {
+      field.classList.remove('visible');
+      document.getElementById('recruiterName').value = '';
+    }
+  }
+
+  function validateEmail(email) {
+    // Must be a valid email ending in @gmail.com
+    return /^[a-zA-Z0-9._%+\-]+@gmail\.com$/.test(email.trim());
+  }
+
+  function showError(id, show) {
+    const el = document.getElementById(id);
+    if (show) el.classList.add('show');
+    else el.classList.remove('show');
+  }
+
+  function setFieldState(inputId, state) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    el.classList.remove('error', 'valid');
+    if (state) el.classList.add(state);
+  }
+
+  // Live email validation
+  document.getElementById('email').addEventListener('input', function() {
+    const val = this.value.trim();
+    if (val === '') { setFieldState('email', ''); showError('err-email', false); return; }
+    if (validateEmail(val)) { setFieldState('email', 'valid'); showError('err-email', false); }
+    else { setFieldState('email', 'error'); showError('err-email', true); }
+  });
+
+  function validate() {
+    let ok = true;
+
+    const name = document.getElementById('applicantName').value.trim();
+    if (!name) { showError('err-name', true); setFieldState('applicantName','error'); ok=false; }
+    else { showError('err-name', false); setFieldState('applicantName','valid'); }
+
+    const wa = document.getElementById('whatsapp').value.trim();
+    if (!wa || wa.length < 7) { showError('err-wa', true); setFieldState('whatsapp','error'); ok=false; }
+    else { showError('err-wa', false); setFieldState('whatsapp','valid'); }
+
+    const email = document.getElementById('email').value.trim();
+    if (!validateEmail(email)) { showError('err-email', true); setFieldState('email','error'); ok=false; }
+    else { showError('err-email', false); setFieldState('email','valid'); }
+
+    const level = document.getElementById('englishLevel').value;
+    if (!level) { showError('err-level', true); ok=false; }
+    else { showError('err-level', false); }
+
+    const reach = document.getElementById('howReach').value;
+    if (!reach) { showError('err-reach', true); ok=false; }
+    else { showError('err-reach', false); }
+
+    return ok;
+  }
+
+  async function handleSubmit() {
+    if (!validate()) return;
+
+    const btn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    btn.disabled = true;
+    btnText.innerHTML = '<span class="spinner"></span>Submitting...';
+
+    const payload = {
+      applicantName: document.getElementById('applicantName').value.trim(),
+      whatsapp: document.getElementById('whatsapp').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      englishLevel: document.getElementById('englishLevel').value,
+      howReach: document.getElementById('howReach').value,
+      recruiterName: document.getElementById('recruiterName').value.trim()
+    };
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      // no-cors won't throw on success; log quietly
+      console.warn('Fetch note:', e);
+    }
+
+    // Show success regardless (no-cors hides response)
+    document.getElementById('formFields').classList.add('hide');
+    document.getElementById('successScreen').classList.add('show');
+  }
+</script>
+</body>
+</html>
